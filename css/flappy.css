@@ -58,6 +58,95 @@
 
 }
 
+.recorde{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-family: Pixel, sans-serif;
+    font-size: 32px;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    z-index: 100;
+}
+
+/* Overlay de Game Over */
+.game-over{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none; /* aparece só ao terminar */
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 200;
+}
+
+.game-over-titulo{
+    font-family: Pixel, sans-serif;
+    color: #fff;
+    font-size: 72px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.game-over-score{
+    font-family: Pixel, sans-serif;
+    color: #fff;
+    font-size: 48px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.game-over-recorde{
+    font-family: Pixel, sans-serif;
+    color: #fff;
+    font-size: 36px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.game-over-recorde.novo-recorde{
+    color: #FFD700; /* dourado para destacar novo recorde */
+}
+
+.btn-reiniciar{
+    font-family: Pixel, sans-serif;
+    font-size: 32px;
+    padding: 10px 20px;
+    border: 3px solid #fff;
+    color: #333;
+    background: #A5E82E;
+    cursor: pointer;
+}
+
+.btn-reiniciar:hover{
+    filter: brightness(0.9);
+}
+
+/* Contagem regressiva */
+.countdown{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* aparece ao iniciar */
+    align-items: center;
+    justify-content: center;
+    font-family: Pixel, sans-serif;
+    color: #fff;
+    font-size: 120px;
+    text-shadow: 4px 4px 0 #000;
+    z-index: 190;
+    pointer-events: none; /* evita bloquear cliques se necessário */
+    transform: translateY(-120px); /* acima do pássaro */
+}
+
+/* (menu inicial removido) */
+
 
 
 

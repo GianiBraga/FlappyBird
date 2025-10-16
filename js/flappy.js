@@ -18,7 +18,7 @@ function Barreira(reversa = false) {
 
 // const b = new Barreira(true)
 // b.setAltura(200)
-// document.querySelector('[wm-flappy').appendChild(b.elemento)
+// document.querySelector('[wm-flappy]').appendChild(b.elemento)
 
 function ParDeBarreiras(altura, abertura, x) {
     this.elemento = novoElemento('div', 'par-de-barreiras')
@@ -46,7 +46,7 @@ function ParDeBarreiras(altura, abertura, x) {
 }
 
 // const b = new ParDeBarreiras(600, 200, 400)
-// document.querySelector('[wm-flappy').appendChild(b.elemento)
+// document.querySelector('[wm-flappy]').appendChild(b.elemento)
 
 function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
     this.pares = [
@@ -116,7 +116,7 @@ function Progresso() {
 
 // const barreiras = new Barreiras(600, 1200, 200, 400)
 // const passaro = new Passaro(700)
-// const areaDoJogo = document.querySelector('[wm-flappy')
+// const areaDoJogo = document.querySelector('[wm-flappy]')
 // areaDoJogo.appendChild(passaro.elemento)
 // areaDoJogo.appendChild(new Progresso().elemento)
 // barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento))
@@ -149,31 +149,117 @@ function colidiu(passaro, barreiras) {
 
 function FlappyBird() {
     let pontos = 0
+    const getRecorde = () => Number(localStorage.getItem('flappyRecorde') || 0)
+    const setRecorde = (v) => localStorage.setItem('flappyRecorde', String(v))
+    let recorde = getRecorde()
 
-    const areaDoJogo = document.querySelector('[wm-flappy')
+    const areaDoJogo = document.querySelector('[wm-flappy]')
     const altura = areaDoJogo.clientHeight
     const largura = areaDoJogo.clientWidth
 
     const progresso = new Progresso()
-    const barreiras = new Barreiras(altura, largura, 200, 400, () => progresso.atualizarPontos(++pontos))
+    // HUD de recorde durante o jogo
+    const recordeHud = novoElemento('span', 'recorde')
+    recordeHud.innerHTML = `Recorde: ${recorde}`
+    const notificarPonto = () => {
+        progresso.atualizarPontos(++pontos)
+        const visualRecorde = pontos > recorde ? pontos : recorde
+        recordeHud.innerHTML = `Recorde: ${visualRecorde}`
+    }
+    const barreiras = new Barreiras(altura, largura, 200, 400, notificarPonto)
     const passaro = new Passaro(altura)
+
+    // Menu simples de Game Over
+    const menu = novoElemento('div', 'game-over')
+    const titulo = novoElemento('div', 'game-over-titulo')
+    titulo.innerText = 'Game Over'
+    const score = novoElemento('div', 'game-over-score')
+    const recordeEl = novoElemento('div', 'game-over-recorde')
+    const botao = novoElemento('button', 'btn-reiniciar')
+    botao.innerText = 'Reiniciar'
+    menu.appendChild(titulo)
+    menu.appendChild(score)
+    menu.appendChild(recordeEl)
+    menu.appendChild(botao)
+
+    // Overlay de contagem regressiva
+    const countdownEl = novoElemento('div', 'countdown')
 
     areaDoJogo.appendChild(progresso.elemento)
     areaDoJogo.appendChild(passaro.elemento)
+    areaDoJogo.appendChild(recordeHud)
     barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento))
+    areaDoJogo.appendChild(menu)
+    areaDoJogo.appendChild(countdownEl)
 
-    this.star = () => {
-        //loop do jogo
-        const temporizador = setInterval(() => {
-            barreiras.animar()
-            passaro.animar()
-
-            if (colidiu(passaro, barreiras)) {
-                clearInterval(temporizador)
+    const mostrarGameOver = () => {
+        menu.style.display = 'flex'
+        score.innerText = `Pontuacao: ${pontos}`
+        if (pontos > recorde) {
+            setRecorde(pontos)
+            recorde = pontos
+            recordeEl.innerText = `Novo recorde: ${recorde}!`
+            recordeEl.classList.add('novo-recorde')
+        } else {
+            recordeEl.innerText = `Recorde: ${recorde}`
+            recordeEl.classList.remove('novo-recorde')
+        }
+        // Permite reiniciar apenas com Enter (ou clique no botão)
+        const keyHandler = (e) => {
+            if (e.code === 'Enter') {
+                e.preventDefault()
+                window.location.reload()
             }
+        }
+        window.addEventListener('keydown', keyHandler, { once: true })
+        // Suporte adicional: captura Enter se a tecla já estava pressionada
+        const __onKeyExtra = (e) => {
+            const code = e.code || ''
+            const key = e.key || ''
+            const keyCode = e.keyCode || 0
+            if (code === 'Enter' || key === 'Enter' || keyCode === 13) {
+                e.preventDefault()
+                window.location.reload()
+            }
+        }
+        window.addEventListener('keyup', __onKeyExtra, { once: true })
+    }
 
-        }, 20)
+    // Reinicia recarregando a página (mais simples e robusto)
+    botao.addEventListener('click', () => window.location.reload())
+
+    this.start = () => {
+        const startLoop = () => {
+            const temporizador = setInterval(() => {
+                barreiras.animar()
+                passaro.animar()
+
+                if (colidiu(passaro, barreiras)) {
+                    clearInterval(temporizador)
+                    mostrarGameOver()
+                }
+
+            }, 20)
+        }
+
+        // Inicia imediatamente com a contagem regressiva
+        countdownEl.style.display = 'flex'
+        let c = 3
+        countdownEl.innerText = c
+        const t = setInterval(() => {
+            if (c > 1) {
+                c--
+                countdownEl.innerText = c
+            } else {
+                clearInterval(t)
+                countdownEl.innerText = 'Go'
+                setTimeout(() => {
+                    countdownEl.style.display = 'none'
+                    startLoop()
+                }, 700)
+            }
+        }, 1000)
     }
 }
 
-new FlappyBird().star()
+new FlappyBird().start()
